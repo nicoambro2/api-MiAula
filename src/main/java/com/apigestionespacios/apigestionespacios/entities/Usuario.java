@@ -40,10 +40,10 @@ public class Usuario implements UserDetails {
 
     @Column(
             nullable = false,
-            length = 50,
+            length = 100,
             unique = true
     )
-    private String username;
+    private String email;
 
     @Column(
             nullable = false,
@@ -67,5 +67,11 @@ public class Usuario implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + rol.name()));
+    }
+
+    // Se sobreescribe el metodo de UserDetails para poder hacer el cambio del atributo username a email
+    @Override
+    public String getUsername() {
+        return email;
     }
 } 

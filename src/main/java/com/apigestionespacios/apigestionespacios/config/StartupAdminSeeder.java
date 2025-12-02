@@ -29,7 +29,7 @@ public class StartupAdminSeeder implements CommandLineRunner {
                 Usuario admin = Usuario.builder()
                         .nombre("Admin")
                         .apellido("Principal")
-                        .username("admin")
+                        .email("admin@gmail.com")
                         .password("admin")
                         .rol(Rol.ADMIN)
                         .comisiones(Collections.emptyList())
@@ -38,7 +38,7 @@ public class StartupAdminSeeder implements CommandLineRunner {
                 UsuarioCreateDTO usuarioCreateDTO = UsuarioCreateDTO.builder()
                         .nombre(admin.getNombre())
                         .apellido(admin.getApellido())
-                        .username(admin.getUsername())
+                        .email(admin.getUsername())
                         .password(admin.getPassword())
                         .rol(admin.getRol())
                         .build();

@@ -1,4 +1,4 @@
-package com.apigestionespacios.apigestionespacios.service;
+package com.apigestionespacios.apigestionespacios.service.reservaService;
 
 import com.apigestionespacios.apigestionespacios.dtos.cronograma.CronogramaEspaciosDTO;
 import com.apigestionespacios.apigestionespacios.dtos.reserva.ReservaCreateDTO;
@@ -8,19 +8,17 @@ import com.apigestionespacios.apigestionespacios.entities.*;
 import com.apigestionespacios.apigestionespacios.entities.enums.DiaSemana;
 import com.apigestionespacios.apigestionespacios.exceptions.EntityValidationException;
 import com.apigestionespacios.apigestionespacios.exceptions.ReservaSolapadaException;
-import com.apigestionespacios.apigestionespacios.exceptions.ResourceConflictException;
 import com.apigestionespacios.apigestionespacios.exceptions.ResourceNotFoundException;
 import com.apigestionespacios.apigestionespacios.repository.ReservaRepository;
+import com.apigestionespacios.apigestionespacios.service.ComisionService;
+import com.apigestionespacios.apigestionespacios.service.EspacioService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -34,12 +32,16 @@ public class ReservaService {
     private final ReservaRepository reservaRepository;
     private final ComisionService comisionService;
     private final EspacioService espacioService;
+    private final ReservaMapper reservaMapper;
+    private final ReservaValidator reservaValidator;
 
     @Autowired
-    public ReservaService(ReservaRepository reservaRepository, ComisionService comisionService, EspacioService espacioService) {
+    public ReservaService(ReservaRepository reservaRepository, ComisionService comisionService, EspacioService espacioService, ReservaMapper reservaMapper, ReservaValidator reservaValidator) {
         this.reservaRepository = reservaRepository;
         this.comisionService = comisionService;
         this.espacioService = espacioService;
+        this.reservaMapper = reservaMapper;
+        this.reservaValidator = reservaValidator;
     }
 
     /**
@@ -51,38 +53,18 @@ public class ReservaService {
     public Reserva ReservaCreateDTOtoReserva(ReservaCreateDTO dto) {
         Espacio espacio = espacioService.obtenerPorId(dto.getEspacioId());
         Comision comision = comisionService.obtenerComisionPorId(dto.getComisionId());
-        DiaSemana dia = DiaSemana.desdeDayOfWeek(dto.getFechaInicio().getDayOfWeek());
 
-        return Reserva.builder()
-                .fechaInicio(dto.getFechaInicio())
-                .fechaFin(dto.getFechaFin())
-                .horaInicio(dto.getHoraInicio())
-                .horaFin(dto.getHoraFin())
-                .dia(dia)
-                .espacio(espacio)
-                .comision(comision)
-                .build();
+        return reservaMapper.toEntidad(dto, espacio, comision);
     }
 
     /**
      * Convierte una entidad Reserva a un DTO de respuesta.
      *
-     * @param r Entidad Reserva a convertir.
+     * @param reserva Entidad Reserva a convertir.
      * @return DTO de respuesta de reserva.
      */
-    public ReservaResponseDTO reservaToReservaResponseDTO(Reserva r) {
-        return ReservaResponseDTO.builder()
-                .id(r.getId())
-                .fechaInicio(r.getFechaInicio())
-                .fechaFin(r.getFechaFin())
-                .dia(r.getDia())
-                .horaInicio(r.getHoraInicio())
-                .horaFin(r.getHoraFin())
-                .nombreEspacio(r.getEspacio().getNombre())
-                .nombreComision(r.getComision().getNombre())
-                .nombreAsignatura(r.getComision().getAsignatura().getNombre())
-                .nombreDocente(r.getComision().getProfesor().getNombre() + " " + r.getComision().getProfesor().getApellido())
-                .build();
+    public ReservaResponseDTO reservaToReservaResponseDTO(Reserva reserva) {
+        return reservaMapper.toDTO(reserva);
     }
 
     /**
@@ -101,9 +83,7 @@ public class ReservaService {
      * @return Lista de ReservaResponseDTO.
      */
     public List<ReservaResponseDTO> listaReservasAReservasResponseDTO(List<Reserva> reservas) {
-        return reservas.stream()
-                .map(this::reservaToReservaResponseDTO)
-                .toList();
+        return reservaMapper.toDTOList(reservas);
     }
 
     /**
@@ -117,27 +97,9 @@ public class ReservaService {
         Espacio espacio = espacioService.obtenerPorId(dto.getEspacioId());
         Comision comision = comisionService.obtenerComisionPorId(dto.getComisionId());
 
-        if (comision.getAsignatura().getRequiereLaboratorio() && !(espacio instanceof Laboratorio)) {
-            throw new EntityValidationException("El espacio solicitado debe ser un laboratorio para esta asignatura.");
-        }
-
-        if(espacio.getCapacidad() < comision.getCantidadAlumnos()) {
-            throw new EntityValidationException("La cantidad de alumnos no puede ser mayor a la capacidad del espacio.");
-        }
-
-        if (dto.getFechaFin().isBefore(dto.getFechaInicio())) {
-            throw new EntityValidationException("La fecha de fin no puede ser anterior a la de inicio.");
-        }
-
-        if (dto.getHoraFin().isBefore(dto.getHoraInicio())) {
-            throw new EntityValidationException("La hora de fin no puede ser anterior a la de inicio.");
-        }
+        reservaValidator.validarNuevaReserva( dto, espacio, comision);
 
         Reserva reserva = ReservaCreateDTOtoReserva(dto);
-
-        if (existeSolapamiento(reserva)) {
-            throw new ReservaSolapadaException("El espacio ya está reservado en ese horario");
-        }
         return reservaRepository.save(reserva);
     }
 
@@ -176,9 +138,7 @@ public class ReservaService {
         }
 
         // Valida solapamientos antes de guardar
-        if (existeSolapamiento(reservaExistente)) {
-            throw new ReservaSolapadaException("El espacio ya está reservado en ese horario");
-        }
+        reservaValidator.existeSolapamiento(reservaExistente);
 
         return reservaRepository.save(reservaExistente);
     }
@@ -190,10 +150,6 @@ public class ReservaService {
      * @throws ResourceNotFoundException si no se encuentra la reserva.
      */
     public void finalizarReserva(Long id) {
-        if (!reservaRepository.existsById(id)) {
-            throw new EntityNotFoundException("Reserva con ID " + id + " no encontrada");
-        }
-
         Reserva reserva = obtenerReserva(id);
 
         if (reserva.getFechaInicio().isAfter(LocalDate.now())) {
@@ -254,32 +210,7 @@ public class ReservaService {
                         .toList());
     }
 
-    /**
-     * Verifica si una nueva reserva se solapa con reservas existentes.
-     *
-     * @param nuevaReserva Reserva a verificar.
-     * @return true si hay solapamiento, false en caso contrario.
-     */
-    public boolean existeSolapamiento(Reserva nuevaReserva) {
-        List<Reserva> reservasExistentes = reservaRepository
-                .findByEspacioIdAndDia(nuevaReserva.getEspacio().getId(), nuevaReserva.getDia());
 
-        for (Reserva existente : reservasExistentes) {
-            boolean fechasSeSolapan =
-                    !(nuevaReserva.getFechaFin().isBefore(existente.getFechaInicio()) ||
-                            nuevaReserva.getFechaInicio().isAfter(existente.getFechaFin()));
-
-            boolean horasSeSolapan =
-                    !(nuevaReserva.getHoraFin().isBefore(existente.getHoraInicio()) ||
-                            nuevaReserva.getHoraInicio().isAfter(existente.getHoraFin()));
-
-            if (fechasSeSolapan && horasSeSolapan) {
-                return true; // conflicto detectado
-            }
-        }
-
-        return false;
-    }
 
     /**
      * Obtiene un cronograma de reservas para una fecha específica, agrupado por espacio.
@@ -332,7 +263,7 @@ public class ReservaService {
      */
     public ReservaResponseDTO obtenerReservaDTO(Long id) {
         Reserva reserva = obtenerReserva(id);
-        return reservaToReservaResponseDTO(reserva);
+        return reservaMapper.toDTO(reserva);
     }
 
 

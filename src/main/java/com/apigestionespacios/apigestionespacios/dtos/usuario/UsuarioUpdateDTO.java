@@ -12,9 +12,9 @@ import lombok.*;
 @Builder
 public class UsuarioUpdateDTO {
 
-    @Schema(description = "Nombre de usuario actual para confirmar update", example = "daniel123")
-    @NotBlank(message = "Debe ingresar su username actual")
-    private String currentUsername;
+    @Schema(description = "Email actual para confirmar update", example = "daniel123@email.com")
+    @NotBlank(message = "Debe ingresar su email actual")
+    private String currentEmail;
 
     @Schema(description = "Contraseña de usuario actual para confirmar update", example = "1234Abcd!")
     @NotBlank(message = "Debe ingresar su contraseña actual")
@@ -28,9 +28,9 @@ public class UsuarioUpdateDTO {
     @Size(max = 50, message = "El apellido debe tener máximo 50 caracteres")
     private String apellido;
 
-    @Schema(description = "Nombre de usuario para login", example = "daniel123")
-    @Size(max = 50, message = "El username debe tener máximo 50 caracteres")
-    private String username;
+    @Schema(description = "Email del usuario para login", example = "daniel123@email.com")
+    @Size(max = 100, message = "El email debe tener máximo 100 caracteres")
+    private String email;
 
     @Schema(description = "Contraseña para el usuario", example = "1234Abcd!")
     @Size(min = 6, max = 100, message = "La contraseña debe tener entre 6 y 100 caracteres")

@@ -23,10 +23,10 @@ public class UsuarioCreateDTO {
     @Size(max = 50, message = "El apellido debe tener máximo 50 caracteres")
     private String apellido;
 
-    @Schema(description = "Nombre de usuario para login", example = "daniel123")
-    @NotBlank(message = "El username es obligatorio")
-    @Size(max = 50, message = "El username debe tener máximo 50 caracteres")
-    private String username;
+    @Schema(description = "Email del usuario para login", example = "daniel123@email.com")
+    @NotBlank(message = "El email es obligatorio")
+    @Size(max = 100, message = "El email debe tener máximo 100 caracteres")
+    private String email;
 
     @Schema(description = "Contraseña para el usuario", example = "1234Abcd!")
     @NotBlank(message = "La contraseña es obligatoria")

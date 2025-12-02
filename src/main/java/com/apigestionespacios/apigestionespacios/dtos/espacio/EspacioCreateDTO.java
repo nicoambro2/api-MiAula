@@ -19,10 +19,10 @@ public class EspacioCreateDTO {
     @NotNull(message = "La capacidad del espacio no puede ser nula")
     private Integer capacidad;
 
-    @Schema(description = "Indica si el espacio tiene proyector", example = "true")
+    @Schema(description = "Indica si el espacio tiene proyector")
     private Boolean tieneProyector;
 
-    @Schema(description = "Indica si el espacio tiene TV", example = "false")
+    @Schema(description = "Indica si el espacio tiene TV")
     private Boolean tieneTV;
 
     @Schema(description = "Tipo de espacio: 'AULA' o 'LABORATORIO'", example = "AULA")

@@ -20,8 +20,8 @@ public class UsuarioResponseDTO {
     @Schema(description = "Apellido del usuario", example = "Diaz")
     private String apellido;
 
-    @Schema(description = "Nombre de usuario para login", example = "daniel123")
-    private String username;
+    @Schema(description = "Nombre de usuario para login", example = "daniel123@email.com")
+    private String email;
 
     @Schema(description = "Rol asignado al usuario", example = "PROFESOR")
     private Rol rol;
