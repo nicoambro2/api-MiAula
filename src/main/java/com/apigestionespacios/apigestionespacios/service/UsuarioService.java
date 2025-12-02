@@ -36,7 +36,7 @@ public class UsuarioService implements UserDetailsService {
         return Usuario.builder()
                 .nombre(dto.getNombre())
                 .apellido(dto.getApellido())
-                .username(dto.getUsername())
+                .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .rol(parseOrThrow(dto.getRol().toString()))
                 .build();
@@ -47,7 +47,7 @@ public class UsuarioService implements UserDetailsService {
                 .id(usuario.getId())
                 .nombre(usuario.getNombre())
                 .apellido(usuario.getApellido())
-                .username(usuario.getUsername())
+                .email(usuario.getUsername())
                 .rol(usuario.getRol())
                 .build();
     }
@@ -82,22 +82,22 @@ public class UsuarioService implements UserDetailsService {
         return usuarioToUsuarioResponseDTO(usuario);
     }
 
-    public UsuarioResponseDTO obtenerPorUsername(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+    public UsuarioResponseDTO obtenerPorUsername(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + email));
         return this.usuarioToUsuarioResponseDTO(usuario);
     }
 
     /**
      * Obtiene un usuario por su username y lo convierte a DTO de respuesta.
      *
-     * @param username el username del usuario a buscar.
+     * @param email el username del usuario a buscar.
      * @return UsuarioResponseDTO correspondiente al usuario.
      * @throws ResourceNotFoundException si no existe el usuario con ese username.
      */
-    public UsuarioResponseDTO obtenerPorUsernameDTO(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+    public UsuarioResponseDTO obtenerPorUsernameDTO(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + email));
         return usuarioToUsuarioResponseDTO(usuario);
     }
 
@@ -109,7 +109,7 @@ public class UsuarioService implements UserDetailsService {
      * @throws ResourceConflictException si ya existe un usuario con el mismo username.
      */
     public Usuario crearUsuario(UsuarioCreateDTO dto) {
-        if (usuarioRepository.existsByUsername(dto.getUsername())) {
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceConflictException("Ya existe un usuario con el mismo username");
         }
 
@@ -131,7 +131,7 @@ public class UsuarioService implements UserDetailsService {
         Usuario existente = obtenerPorId(id);
 
         // Validar identidad
-        if (!existente.getUsername().equals(dto.getCurrentUsername())) {
+        if (!existente.getUsername().equals(dto.getCurrentEmail())) {
             throw new RuntimeException("El nombre de usuario actual no coincide");
         }
         if (!passwordEncoder.matches(dto.getCurrentPassword(), existente.getPassword())) {
@@ -139,9 +139,9 @@ public class UsuarioService implements UserDetailsService {
         }
 
         // Validar nuevo username si cambia
-        if (dto.getUsername() != null && !dto.getUsername().isBlank() &&
-                !dto.getUsername().equals(existente.getUsername()) &&
-                usuarioRepository.existsByUsername(dto.getUsername())) {
+        if (dto.getEmail() != null && !dto.getEmail().isBlank() &&
+                !dto.getEmail().equals(existente.getUsername()) &&
+                usuarioRepository.existsByEmail(dto.getEmail())) {
             throw new ResourceConflictException("El username ya está en uso por otro usuario");
         }
 
@@ -152,8 +152,8 @@ public class UsuarioService implements UserDetailsService {
         if (dto.getApellido() != null && !dto.getApellido().isBlank()) {
             existente.setApellido(dto.getApellido());
         }
-        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
-            existente.setUsername(dto.getUsername());
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            existente.setEmail(dto.getEmail());
         }
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             existente.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -198,10 +198,10 @@ public class UsuarioService implements UserDetailsService {
     }
 
     @Override
-    public Usuario loadUserByUsername(String username) throws UsernameNotFoundException {
+    public Usuario loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        return usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + email));
     }
 
 }

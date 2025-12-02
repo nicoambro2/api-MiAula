@@ -8,6 +8,7 @@ import com.apigestionespacios.apigestionespacios.entities.enums.EstadoSolicitud;
 import com.apigestionespacios.apigestionespacios.exceptions.EntityValidationException;
 import com.apigestionespacios.apigestionespacios.exceptions.ResourceNotFoundException;
 import com.apigestionespacios.apigestionespacios.repository.SolicitudRepository;
+import com.apigestionespacios.apigestionespacios.service.reservaService.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

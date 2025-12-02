@@ -107,7 +107,7 @@ public class CarreraController {
      * @param asignaturaIds Lista de IDs de las asignaturas a asignar.
      * @return Respuesta vacía con código 204 No Content si la operación es exitosa.
      */
-    @PostMapping("/{carreraId}/agregar-     asignaturas")
+    @PostMapping("/{carreraId}/agregar-asignaturas")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Asignar asignaturas a una carrera.",

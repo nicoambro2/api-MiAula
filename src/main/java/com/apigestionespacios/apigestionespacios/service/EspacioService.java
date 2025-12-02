@@ -10,6 +10,7 @@ import com.apigestionespacios.apigestionespacios.entities.Laboratorio;
 import com.apigestionespacios.apigestionespacios.exceptions.ResourceConflictException;
 import com.apigestionespacios.apigestionespacios.exceptions.ResourceNotFoundException;
 import com.apigestionespacios.apigestionespacios.repository.EspacioRepository;
+import com.apigestionespacios.apigestionespacios.service.reservaService.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

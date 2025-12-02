@@ -4,9 +4,11 @@ import com.apigestionespacios.apigestionespacios.dtos.comision.ComisionCreateDTO
 import com.apigestionespacios.apigestionespacios.dtos.comision.ComisionResponseDTO;
 import com.apigestionespacios.apigestionespacios.dtos.comision.ComisionUpdateDTO;
 import com.apigestionespacios.apigestionespacios.dtos.cronograma.CronogramaComisionDTO;
+import com.apigestionespacios.apigestionespacios.dtos.usuario.UsuarioResponseDTO;
 import com.apigestionespacios.apigestionespacios.entities.Comision;
 import com.apigestionespacios.apigestionespacios.entities.Usuario;
 import com.apigestionespacios.apigestionespacios.service.ComisionService;
+import com.apigestionespacios.apigestionespacios.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,10 +28,12 @@ import java.util.List;
 public class ComisionController {
 
     private final ComisionService comisionService;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public ComisionController(ComisionService comisionService) {
+    public ComisionController(ComisionService comisionService, UsuarioService usuarioService) {
         this.comisionService = comisionService;
+        this.usuarioService = usuarioService;
     }
 
     /**
@@ -161,10 +165,10 @@ public class ComisionController {
             summary = "Obtener comisiones asociadas al profesor autenticado.",
             description = "Permite al profesor logueado obtener un listado de las comisiones a su cargo.")
     public ResponseEntity<List<ComisionResponseDTO>> obtenerMisComisiones(Authentication authentication) {
-        Usuario usuarioLogueado = (Usuario) authentication.getPrincipal();
-        Long profesorId = usuarioLogueado.getId(); // extraemos el ID del profesor autenticado
+        String username = authentication.getName();
+        UsuarioResponseDTO profesor = usuarioService.obtenerPorUsername(username); // extraemos el ID del profesor autenticado
 
-        List<ComisionResponseDTO> comisiones = comisionService.obtenerComisionesPorProfesor(profesorId);
+        List<ComisionResponseDTO> comisiones = comisionService.obtenerComisionesPorProfesor(profesor.getId());
 
         if (comisiones.isEmpty()) {
             return ResponseEntity.noContent().build();
