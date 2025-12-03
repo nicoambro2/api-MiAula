@@ -55,6 +55,10 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Rol rol;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean activo = true;
+
     @OneToMany(
             mappedBy = "profesor", // Nombre de la propiedad en la clase Comision que hace referencia a Usuario
             cascade = CascadeType.ALL,

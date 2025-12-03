@@ -37,7 +37,7 @@ public class UsuarioController {
             summary = "Listar usuarios",
             description = "Obtiene la lista de todos los usuarios registrados en el sistema.")
     @GetMapping
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios() {
         List<UsuarioResponseDTO> usuarios = usuarioService.obtenerTodosDTO();
         return new ResponseEntity<>(usuarios, HttpStatus.OK);

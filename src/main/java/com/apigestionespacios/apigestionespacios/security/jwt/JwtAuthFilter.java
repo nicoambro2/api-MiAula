@@ -1,6 +1,8 @@
 package com.apigestionespacios.apigestionespacios.security.jwt;
 
 import com.apigestionespacios.apigestionespacios.service.UsuarioService;
+
+import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,8 +26,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         try {
@@ -45,7 +47,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             // Obtenemos el nombre de usuario desde el token
             String username = jwtService.extractUsername(token);
 
-            // Si obtenemos un username y no hay autenticación en contexto, validamos el token
+            // Si obtenemos un username y no hay autenticación en contexto, validamos el
+            // token
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 // Cargamos los datos del usuario desde base de datos
@@ -55,17 +58,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 if (jwtService.isTokenValid(token, userDetails)) {
 
                     // Creamos el token de autenticación de Spring
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
                     // Cargamos información adicional del request
                     authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                            new WebAuthenticationDetailsSource().buildDetails(request));
 
                     // Establecemos el usuario autenticado en el contexto de Spring
                     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -74,12 +74,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // Continuamos la cadena de filtros
             filterChain.doFilter(request, response);
-        }
-        catch (io.jsonwebtoken.JwtException e) {
+        } catch (io.jsonwebtoken.JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token JWT invalido o expirado.");
         }
 
     }
-    
+
 }
