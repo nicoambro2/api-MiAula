@@ -110,14 +110,14 @@ public class UsuarioController {
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESOR')")
     public ResponseEntity<UsuarioResponseDTO> obtenerUsuarioLogueado(Authentication authentication) {
-        String username = authentication.getName();
-        return new ResponseEntity<>(usuarioService.obtenerPorUsername(username), HttpStatus.OK);
+        String email = authentication.getName();
+        return new ResponseEntity<>(usuarioService.obtenerPorUsername(email), HttpStatus.OK);
     }
 
     @Operation(
             summary = "Actualizar usuario",
             description = "Actualiza los datos del un usuario logueado.")
-    @PutMapping
+    @PatchMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESOR')")
     public ResponseEntity<UsuarioResponseDTO> actualizarUsuario(
             Authentication authentication,
@@ -129,7 +129,17 @@ public class UsuarioController {
 
         return new ResponseEntity<>(usuarioService.actualizarUsuario(usuarioId, usuario), HttpStatus.OK);
     }
-
+/* 
+    @Operation(
+        summary = "Actualizar informacion personal del usuario",
+        description = "Actualiza nombre, apellido y email del usuario")
+        @PatchMapping
+        @PreAuthorize("hasAnyRole('ADMIN', 'PROFESOR')")
+        public ResponseEntity<UsuarioResponseDTO> actualizarInfoPersonal(
+                Authentication authentication,
+                @Parameter(description = )
+        )
+*/
     @Operation(
             summary = "Actualizar rol de usuario por ID",
             description = "Actualiza el rol de un usuario específico según su ID. Solo accesible para administradores.")

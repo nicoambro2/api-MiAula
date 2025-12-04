@@ -26,6 +26,7 @@ public class UsuarioCreateDTO {
     @Schema(description = "Email del usuario para login", example = "daniel123@email.com")
     @NotBlank(message = "El email es obligatorio")
     @Size(max = 100, message = "El email debe tener máximo 100 caracteres")
+    @Email(message = "Formato de Email inválido")
     private String email;
 
     @Schema(description = "Contraseña para el usuario", example = "1234Abcd!")

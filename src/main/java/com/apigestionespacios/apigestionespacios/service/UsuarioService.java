@@ -106,7 +106,8 @@ public class UsuarioService implements UserDetailsService {
      *
      * @param dto DTO con los datos para crear un usuario.
      * @return UsuarioResponseDTO con los datos del usuario guardado.
-     * @throws ResourceConflictException si ya existe un usuario con el mismo username.
+     * @throws ResourceConflictException si ya existe un usuario con el mismo
+     *                                   username.
      */
     public Usuario crearUsuario(UsuarioCreateDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
@@ -119,41 +120,32 @@ public class UsuarioService implements UserDetailsService {
     }
 
     /**
-        * Actualiza un usuario existente a partir de un DTO de actualización.
-        *
-        * @param id  ID del usuario a actualizar.
-        * @param dto DTO con los datos para actualizar el usuario.
-        * @return UsuarioResponseDTO con los datos del usuario actualizado.
-        * @throws ResourceNotFoundException si no existe el usuario con ese ID.
-        * @throws ResourceConflictException  si el nuevo username ya está en uso por otro usuario.
-        */
+     * Actualiza un usuario existente a partir de un DTO de actualización.
+     *
+     * @param id  ID del usuario a actualizar.
+     * @param dto DTO con los datos para actualizar el usuario.
+     * @return UsuarioResponseDTO con los datos del usuario actualizado.
+     * @throws ResourceNotFoundException si no existe el usuario con ese ID.
+     * @throws ResourceConflictException si el nuevo username ya está en uso por
+     *                                   otro usuario.
+     */
     public UsuarioResponseDTO actualizarUsuario(Long id, UsuarioUpdateDTO dto) {
         Usuario existente = obtenerPorId(id);
 
-        // Validar identidad
-        if (!existente.getUsername().equals(dto.getCurrentEmail())) {
-            throw new RuntimeException("El nombre de usuario actual no coincide");
-        }
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), existente.getPassword())) {
-            throw new RuntimeException("La contraseña actual es incorrecta");
-        }
-
-        // Validar nuevo username si cambia
-        if (dto.getEmail() != null && !dto.getEmail().isBlank() &&
-                !dto.getEmail().equals(existente.getUsername()) &&
-                usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceConflictException("El username ya está en uso por otro usuario");
-        }
-
         // Actualizar solo campos no nulos
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            if (usuarioRepository.existsByEmail(dto.getEmail())) {
+                throw new ResourceConflictException("Ya existe un usuario registrado con este email");
+            } else {
+                existente.setEmail(dto.getEmail());
+            }
+        }
+
         if (dto.getNombre() != null && !dto.getNombre().isBlank()) {
             existente.setNombre(dto.getNombre());
         }
         if (dto.getApellido() != null && !dto.getApellido().isBlank()) {
             existente.setApellido(dto.getApellido());
-        }
-        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-            existente.setEmail(dto.getEmail());
         }
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             existente.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -163,23 +155,24 @@ public class UsuarioService implements UserDetailsService {
         return usuarioToUsuarioResponseDTO(guardado);
     }
 
-
     public void eliminar(Long id) {
         if (!usuarioRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
 
-        if(obtenerPorId(id).getRol() == Rol.ADMIN) {
+        if (obtenerPorId(id).getRol() == Rol.ADMIN) {
             throw new ResourceConflictException("No se puede eliminar un usuario con rol ADMIN");
         }
         usuarioRepository.deleteById(id);
     }
 
     /**
-     * Obtiene una lista de usuarios filtrados por rol y los convierte a DTOs de respuesta.
+     * Obtiene una lista de usuarios filtrados por rol y los convierte a DTOs de
+     * respuesta.
      *
      * @param rol el rol por el cual filtrar los usuarios.
-     * @return lista de UsuarioResponseDTO con usuarios que tengan el rol especificado.
+     * @return lista de UsuarioResponseDTO con usuarios que tengan el rol
+     *         especificado.
      */
     public List<UsuarioResponseDTO> obtenerPorRolDTO(Rol rol) {
         List<Usuario> usuarios = usuarioRepository.findByRol(rol);
@@ -204,4 +197,3 @@ public class UsuarioService implements UserDetailsService {
     }
 
 }
-
