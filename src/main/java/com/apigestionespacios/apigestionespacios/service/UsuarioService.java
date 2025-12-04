@@ -84,7 +84,7 @@ public class UsuarioService implements UserDetailsService {
 
     public UsuarioResponseDTO obtenerPorUsername(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
         return this.usuarioToUsuarioResponseDTO(usuario);
     }
 
@@ -110,7 +110,7 @@ public class UsuarioService implements UserDetailsService {
      */
     public Usuario crearUsuario(UsuarioCreateDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new ResourceConflictException("Ya existe un usuario con el mismo username");
+            throw new ResourceConflictException("Ya existe un usuario registrado con este Email");
         }
 
         Usuario usuario = usuarioCreateDTOtoUsuario(dto);

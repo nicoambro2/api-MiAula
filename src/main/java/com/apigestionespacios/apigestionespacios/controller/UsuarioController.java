@@ -94,14 +94,14 @@ public class UsuarioController {
     }
 
     @Operation(
-            summary = "Obtener usuario por username",
-            description = "Obtiene los detalles de un usuario específico según su username. Solo accesible para administradores")
-    @GetMapping("/username/{username}")
+            summary = "Obtener usuario por email",
+            description = "Obtiene los detalles de un usuario específico según su email. Solo accesible para administradores")
+    @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UsuarioResponseDTO> obtenerUsuarioPorUsername(
-            @Parameter(description = "Username del usuario a obtener", required = true)
-            @PathVariable String username) {
-        return new ResponseEntity<>(usuarioService.obtenerPorUsernameDTO(username), HttpStatus.OK);
+    public ResponseEntity<UsuarioResponseDTO> obtenerUsuarioPorEmail(
+            @Parameter(description = "Email del usuario a obtener", required = true)
+            @PathVariable String email) {
+        return new ResponseEntity<>(usuarioService.obtenerPorUsernameDTO(email), HttpStatus.OK);
     }
 
     @Operation(
